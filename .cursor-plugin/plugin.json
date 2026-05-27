@@ -1,6 +1,5 @@
 {
   "name": "quiverai",
-  "displayName": "QuiverAI",
   "version": "0.1.0",
   "description": "Create, refine, and vectorize SVG assets with the hosted QuiverAI MCP server.",
   "author": {
@@ -11,7 +10,6 @@
   "repository": "https://github.com/quiverai/cursor-plugin",
   "license": "MIT",
   "keywords": ["quiverai", "svg", "vector", "mcp", "design"],
-  "category": "developer-tools",
-  "tags": ["svg", "vector", "mcp", "design"],
+  "logo": "assets/logo.svg",
   "skills": "./skills/"
 }

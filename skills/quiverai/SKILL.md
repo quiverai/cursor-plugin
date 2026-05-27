@@ -1,9 +1,6 @@
 ---
-name: QuiverAI
-description: Use when creating, refining, or vectorizing SVG assets with the QuiverAI MCP server, including model selection, reference-image prompting, structured prompt writing, upload handling, generation, vectorization, polling, and reading completed SVG content.
-metadata:
-  author: quiverai
-  version: "2026.05.16"
+name: quiverai
+description: Use when creating, refining, animating, or vectorizing SVG assets with the QuiverAI MCP server, including model selection, reference-image prompting, structured prompt writing, upload handling, generation, animation, vectorization, polling, and reading completed SVG content.
 ---
 
 # QuiverAI SVG Generation
@@ -15,11 +12,12 @@ Before starting, confirm the QuiverAI MCP server is connected and its tools are 
 ## Core Workflow
 
 1. Call `list_models` before choosing a model unless the user explicitly named one.
-2. If the user provides or asks to use a reference image, call `create_upload`, upload the image to the returned URL, then pass the upload ID as a reference.
-3. Call `create_generation` for text-to-SVG work, or `create_vectorization` when the task is raster-to-SVG conversion.
-4. Poll `get_batch` until the batch reaches `completed`, `failed`, or another terminal status.
-5. For completed outputs, call `get_artwork` for metadata.
-6. Call `get_artwork_content` only for selected assets or when SVG content is needed.
+2. When the task continues from an existing QuiverAI artwork (animating it, referencing it, or producing a follow-up), call `list_gallery` first to find the right artwork ID. Browse without content; do not pull SVG payloads at this stage.
+3. If the user provides or asks to use a reference image, call `create_upload`, upload the image to the returned URL, then pass the upload ID as a reference.
+4. Pick the right create tool: `create_generation` for text-to-SVG, `create_vectorization` for raster-to-SVG, or `create_animation` to animate an existing SVG artwork or upload.
+5. Poll `get_batch` until the batch reaches `completed`, `failed`, or another terminal status.
+6. For completed outputs, call `get_artwork` for metadata.
+7. Call `get_artwork_content` only for selected assets or when SVG content is needed.
 
 ## Model Selection
 
@@ -72,6 +70,16 @@ Prefer explicit reference prompts such as:
 ```text
 Create a flat vector illustration matching the reference image's geometric style, muted color palette, centered composition, and clean typography. Preserve the overall structure and visual hierarchy. Change only the subject to a delivery drone carrying a small package.
 ```
+
+## Animation
+
+Use `create_animation` when the user wants to animate an SVG that already exists.
+
+- Supply exactly one source: `sourceArtworkId` for an existing QuiverAI artwork, or `sourceUploadId` for an SVG uploaded via `create_upload`. Setting both, or neither, is rejected.
+- If the user references something they generated earlier ("animate the drone I made yesterday"), call `list_gallery` first to find the artwork ID.
+- `n` must be `1`; animation batches always return a single artwork.
+- The optional `prompt` controls animation direction, not visual style. The source SVG already defines style; keep the prompt short and concrete (for example, "gentle drift loop", "pulse the central element"). Do not restate color, composition, or typography.
+- Poll the returned batch with `get_batch` exactly like generations and vectorizations, then fetch results via `get_artwork` and `get_artwork_content`.
 
 ## Strong Use Cases
 
