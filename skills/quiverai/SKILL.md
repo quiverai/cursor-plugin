@@ -21,6 +21,8 @@ Before starting, confirm the QuiverAI MCP server is connected and its tools are 
 
 ## Model Selection
 
+- Inspect each `list_models` entry's `access` field before selecting a model. Use models with `access.state: "ok"` directly. If a model is `locked`, explain that it requires one of `requiredPlans` or on-demand credits before using it.
+- Inspect operation-level `availability` before calling paid operations. For example, only call `create_animation` when the selected model's `availability.animate.access.state` is `"ok"`; if it is `"locked"`, report the plan/credit requirement instead of trying the tool.
 - Prefer Arrow 1.1 for general-purpose generation. It is the default choice for stability, speed, and accuracy.
 - Use Arrow 1.1 Max for detail-heavy outputs, refinement-focused generations, engineering sketches, fashion sketches, or cases where richer detail is worth slower generation.
 - Be careful with Arrow 1.1 Max when the user wants a simple icon, clean mark, or minimal illustration; extra detail can create more cleanup work.
