@@ -9,7 +9,7 @@ Generate, refine, and vectorize SVG assets with the hosted [QuiverAI](https://qu
 - Text-to-SVG generation with the Arrow family of models
 - Raster-to-SVG vectorization
 - Reference-image prompting and refinement
-- Gallery and artwork lookup
+- Creation and task lookup
 - A bundled agent skill that guides model selection, prompt structure, and result polling
 
 ## Install
@@ -47,18 +47,17 @@ If you do not already have a Quiver account, sign up at [quiver.ai](https://quiv
 ## MCP tools exposed
 
 - `list_models` - list QuiverAI models available to the connected user
-- `list_gallery` - list generated QuiverAI artworks for the connected user
-- `get_artwork` - read integration-safe metadata for one artwork
-- `get_artwork_content` - read SVG content for one artwork
-- `get_batch` - read a generation or vectorization batch for polling
-- `create_upload` - create an upload slot for a reference image
-- `create_generation` - create a text-to-SVG generation batch
-- `create_vectorization` - create a raster-to-SVG vectorization batch
-- `create_animation` - create an animation batch from an existing SVG artwork or upload
+- `list_creations` - list generated QuiverAI creations for the connected user
+- `get_creation` - read integration-safe metadata for one creation
+- `get_creation_content` - read SVG content for one creation
+- `get_task` - read a generation, vectorization, or animation task for polling
+- `create_generation` - create a text-to-SVG generation task from text and optional image sources
+- `create_vectorization` - create a raster-to-SVG vectorization task from an image source
+- `create_animation` - create an animation task from an existing SVG creation or SVG source
 
 ## Bundled skill
 
-`skills/quiverai/SKILL.md` is a Cursor agent skill. It tells the agent when to call which tool, how to write effective generation prompts, how to handle reference images, and how to poll batches to completion.
+`skills/quiverai/SKILL.md` is a Cursor agent skill. It tells the agent when to call which tool, how to write effective generation prompts, how to pass direct image sources, and how to poll tasks to completion.
 
 ## Example prompts
 
@@ -75,7 +74,7 @@ cursor-agent mcp list
 cursor-agent mcp list-tools quiverai
 ```
 
-The second command should list the nine `quiverai` tools above. From there, ask the agent to run the QuiverAI skill end-to-end (for example: "list models, then generate an SVG of a delivery drone, then read the SVG content").
+The second command should list the eight `quiverai` tools above. From there, ask the agent to run the QuiverAI skill end-to-end (for example: "list models, then generate an SVG of a delivery drone, then read the SVG content").
 
 ## Configuration
 

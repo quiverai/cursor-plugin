@@ -1,6 +1,6 @@
 ---
 name: quiverai
-description: Use when creating, refining, animating, or vectorizing SVG assets with the QuiverAI MCP server, including model selection, reference-image prompting, structured prompt writing, upload handling, generation, animation, vectorization, polling, and reading completed SVG content.
+description: Use when creating, refining, animating, or vectorizing SVG assets with the QuiverAI MCP server, including model selection, reference-image prompting, structured prompt writing, direct source ingestion, generation, animation, vectorization, polling, and reading completed SVG content.
 ---
 
 # QuiverAI SVG Generation
@@ -12,12 +12,12 @@ Before starting, confirm the QuiverAI MCP server is connected and its tools are 
 ## Core Workflow
 
 1. Call `list_models` before choosing a model unless the user explicitly named one.
-2. When the task continues from an existing QuiverAI artwork (animating it, referencing it, or producing a follow-up), call `list_gallery` first to find the right artwork ID. Browse without content; do not pull SVG payloads at this stage.
-3. If the user provides or asks to use a reference image, call `create_upload`, upload the image to the returned URL, then pass the upload ID as a reference.
-4. Pick the right create tool: `create_generation` for text-to-SVG, `create_vectorization` for raster-to-SVG, or `create_animation` to animate an existing SVG artwork or upload.
-5. Poll `get_batch` until the batch reaches `completed`, `failed`, or another terminal status.
-6. For completed outputs, call `get_artwork` for metadata.
-7. Call `get_artwork_content` only for selected assets or when SVG content is needed.
+2. When the task continues from an existing QuiverAI creation (animating it, referencing it, or producing a follow-up), call `list_creations` first to find the right creation ID. Browse without content; do not pull SVG payloads at this stage.
+3. If the user provides or asks to use a reference/source image, pass it directly to the create tool as `{ "url": "https://..." }`, `{ "base64": "...", "mediaType": "image/png" }`, or `{ "uploadId": "..." }`. Quiver fetches or decodes non-upload sources, validates them, stores them, and persists only upload IDs.
+4. Pick the right create tool: `create_generation` for text-to-SVG, `create_vectorization` for raster-to-SVG, or `create_animation` to animate an existing SVG creation or SVG source.
+5. Poll `get_task` until the task reaches `completed`, `failed`, or another terminal status.
+6. For completed outputs, call `get_creation` for metadata.
+7. Call `get_creation_content` only for selected assets or when SVG content is needed.
 
 ## Model Selection
 
@@ -54,12 +54,13 @@ Fill only fields that help the task. Do not add decorative requirements the user
 
 Use reference images when the user has a desired style, color palette, layout, typography direction, or previous generation to build on.
 
-When a reference image is available, be strict and explicit:
+When a reference image is available, pass it in `create_generation.references`. Be strict and explicit:
 
 - Preserve the exact style, color scheme, composition, typography, and structure when the user wants a close match.
 - State what should change separately from what should be preserved.
 - Use the reference for color combinations, illustration style, composition, and typography.
 - If the user wants a variation, derive the prompt from the reference first, then modify only the requested dimensions.
+- Prefer public image URLs when the chat host exposes uploaded files as public URLs. Use base64 only when the host gives image bytes directly. Existing completed Quiver upload IDs are still accepted.
 
 Avoid vague reference prompts such as:
 
@@ -77,11 +78,11 @@ Create a flat vector illustration matching the reference image's geometric style
 
 Use `create_animation` when the user wants to animate an SVG that already exists.
 
-- Supply exactly one source: `sourceArtworkId` for an existing QuiverAI artwork, or `sourceUploadId` for an SVG uploaded via `create_upload`. Setting both, or neither, is rejected.
-- If the user references something they generated earlier ("animate the drone I made yesterday"), call `list_gallery` first to find the artwork ID.
-- `n` must be `1`; animation batches always return a single artwork.
+- Supply exactly one `source`: `{ "creationId": "..." }` for an existing QuiverAI creation, or an SVG source as `{ "url": "https://..." }`, `{ "base64": "...", "mediaType": "image/svg+xml" }`, or `{ "uploadId": "..." }`.
+- If the user references something they generated earlier ("animate the drone I made yesterday"), call `list_creations` first to find the creation ID.
+- `n` must be `1`; animation tasks always return a single creation.
 - The optional `prompt` controls animation direction, not visual style. The source SVG already defines style; keep the prompt short and concrete (for example, "gentle drift loop", "pulse the central element"). Do not restate color, composition, or typography.
-- Poll the returned batch with `get_batch` exactly like generations and vectorizations, then fetch results via `get_artwork` and `get_artwork_content`.
+- Poll the returned task with `get_task` exactly like generations and vectorizations, then fetch results via `get_creation` and `get_creation_content`.
 
 ## Strong Use Cases
 
@@ -96,8 +97,8 @@ QuiverAI is especially strong at:
 
 ## Result Handling
 
-- Show the user completed artwork choices before fetching every SVG payload.
-- Prefer `list_gallery` without content for browsing; use `get_artwork_content` for selected assets.
-- If a batch fails, report the returned failure summary directly and adjust the next prompt based on the failure mode.
+- Show the user completed creation choices before fetching every SVG payload.
+- Prefer `list_creations` without content for browsing; use `get_creation_content` for selected assets.
+- If a task fails, report the returned failure summary directly and adjust the next prompt based on the failure mode.
 - If outputs are close but over-detailed, simplify the prompt and prefer Arrow 1.1 over Arrow 1.1 Max.
 - If outputs miss a reference, make preservation language stricter and separate preserved attributes from requested changes.
