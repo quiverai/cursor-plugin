@@ -13,11 +13,11 @@ Before starting, confirm the QuiverAI MCP server is connected and its tools are 
 
 QuiverAI separates three read surfaces. Pick the tool that matches what the user means.
 
-| Concept      | What it is                                                                                         | MCP tool                               | Typical use                                                                            |
-| ------------ | -------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------- |
-| **Task**     | One whole request (generation, vectorization, or animation) that may produce one or more creations | `get_task`                             | Poll status after `create_*`; inspect all outputs and failure summary for that request |
-| **Creation** | One generated SVG asset (one row in the gallery)                                                   | `get_creation`, `get_creation_content` | Metadata for one asset; **full SVG string** when the user wants the SVG                |
-| **Gallery**  | The user's list of past creations                                                                  | `list_creations`                       | Browse prompts and ids; optionally include inline SVG per item                         |
+| Concept      | What it is                                                                                         | MCP tool                               | Typical use                                                                                                    |
+| ------------ | -------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Task**     | One whole request (generation, vectorization, or animation) that may produce one or more creations | `get_task`                             | Poll status after `create_*`; inspect all outputs and failure summary for that request                         |
+| **Creation** | One generated SVG asset (one row in the gallery)                                                   | `get_creation`, `get_creation_content` | Metadata for one asset; **full SVG string** when the user wants the SVG; optional PNG preview for user display |
+| **Gallery**  | The user's list of past creations                                                                  | `list_creations`                       | Browse prompts and ids; optionally include inline SVG per item                                                 |
 
 **ID rules**
 
@@ -38,7 +38,7 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 4. Pick the right create tool: `create_generation` for text-to-SVG, `create_vectorization` for raster-to-SVG, or `create_animation` to animate an existing SVG creation or SVG source.
 5. Poll **`get_task`** with the returned **`taskId`** until status is terminal (`completed`, `failed`, or `stopped`).
 6. Read outputs via **`creationIds`** or `get_task.creations[].id`.
-7. Call `get_creation` for metadata when needed; call **`get_creation_content`** when the user wants the SVG.
+7. Call `get_creation` for metadata when needed; call **`get_creation_content`** when the user wants the SVG. Use `includePng: true` when the user should see the creation visually; render the returned PNG preview to the user.
 
 ## Gallery workflow (browse → pick → fetch SVG)
 
@@ -48,7 +48,8 @@ Use **`list_creations`** as the gallery. It is the right tool when the user want
 2. **Browse with inline SVG (optional)** — `list_creations` with `includeContent: true` only when you need SVG for many items at once; prefer the two-step flow below for large galleries.
 3. **Open one creation** — After choosing an `id` from the gallery:
    - `get_creation` for metadata (references, rating, capability fields) when needed.
-   - **`get_creation_content`** for the full SVG string when the user wants the file, code, or visual output.
+   - **`get_creation_content`** for the full SVG string when the user wants the file or code.
+   - **`get_creation_content`** with `includePng: true` when the user wants to see the creation visually. The tool returns both the SVG and a PNG preview plus a `renderInstruction` telling you to display the PNG to the user.
 
 Filter gallery calls with `method`, `status`, `limit`, and `cursor` when the user narrows the scope (for example only completed generations).
 
