@@ -114,7 +114,7 @@ Use `create_animation` when the user wants to animate an SVG that already exists
 
 - Supply exactly one `source`: `{ "creationId": "..." }` for an existing QuiverAI creation, or an SVG source as `{ "url": "https://..." }`, `{ "base64": "...", "mediaType": "image/svg+xml" }`, or `{ "uploadId": "..." }`.
 - If the user references something they generated earlier ("animate the drone I made yesterday"), call `list_creations` first to find the creation ID.
-- `n` must be `1`; animation tasks always return a single creation.
+- Animation tasks always return a single creation.
 - The optional `prompt` controls animation direction, not visual style. The source SVG already defines style; keep the prompt short and concrete (for example, "gentle drift loop", "pulse the central element"). Do not restate color, composition, or typography.
 - Poll the returned `taskId` with `get_task`, then fetch SVG via `get_creation_content` on the resulting creation id.
 
