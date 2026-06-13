@@ -74,7 +74,7 @@ cursor-agent mcp list
 cursor-agent mcp list-tools quiverai
 ```
 
-The second command should list the eight `quiverai` tools above. From there, ask the agent to run the QuiverAI skill end-to-end (for example: "list models, then generate an SVG of a delivery drone, then read the SVG content").
+The `quiverai` MCP server should appear as enabled and authenticated. If your client supports listing MCP tools, it should show the eight `quiverai` tools above. From there, ask the agent to run the QuiverAI skill end-to-end (for example: "list models, then generate an SVG of a delivery drone, then read the SVG content").
 
 ## Configuration
 
