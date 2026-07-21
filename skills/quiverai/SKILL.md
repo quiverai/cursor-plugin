@@ -43,11 +43,12 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 
 1. Call `list_models` before choosing a model unless the user explicitly named one.
 2. When the task continues from an existing QuiverAI creation (animating it, referencing it, or producing a follow-up), call `list_creations` first to find the right creation ID. Browse without content; do not pull SVG payloads at this stage.
-3. If the user provides or asks to use a reference/source image, pass it directly to the create tool as `{ "url": "https://..." }`, `{ "base64": "...", "mediaType": "image/png" }`, or `{ "uploadId": "..." }`. Quiver fetches or decodes non-upload sources, validates them, stores them, and persists only upload IDs.
+3. If the user provides or asks to use a reference/source image, pass it directly to the create tool as `{ "url": "https://...", "filename": "reference.png" }`, `{ "base64": "...", "mediaType": "image/png", "filename": "reference.png" }`, or `{ "uploadId": "..." }`. `filename` is optional. Quiver fetches or decodes non-upload sources, validates them, stores them, and persists only upload IDs.
 4. Pick the right create tool: `create_generation` for text-to-SVG, `create_vectorization` for raster-to-SVG, or `create_animation` to animate an existing SVG creation or SVG source.
-5. Poll **`get_task`** with the returned **`taskId`** until status is terminal (`completed`, `failed`, or `stopped`). If every creation is `completed` but the parent task still says `generating`, stop polling, treat the completed creations as ready, and record the status mismatch in your response.
-6. Read output creation ids via **`creationIds`** or `get_task.creations[].id`. Treat `get_task` as status-only; do **not** show SVG snapshots or SVG strings from task polling as final output.
-7. For each completed output you will present, call **`get_creation_content`** with `{ "id": "<creation id>", "includePng": true }`. By default, show only the returned PNG preview to the user. Show SVG text/code only when the user explicitly asks for the SVG source or file content.
+5. `create_generation` accepts optional `n` from 1 to 16 (default 1); `create_animation` accepts optional `n` from 1 to 4 (default 1).
+6. Poll **`get_task`** with the returned **`taskId`** until status is terminal (`completed`, `failed`, or `stopped`). If every creation is `completed` but the parent task still says `generating`, stop polling, treat the completed creations as ready, and record the status mismatch in your response.
+7. Read output creation ids via **`creationIds`** or `get_task.creations[].id`. Treat `get_task` as status-only; do **not** show SVG snapshots or SVG strings from task polling as final output.
+8. For each completed output you will present, call **`get_creation_content`** with `{ "id": "<creation id>", "includePng": true }`. By default, show only the returned PNG preview to the user. Show SVG text/code only when the user explicitly asks for the SVG source or file content.
 
 ## Gallery workflow (browse → pick → fetch SVG)
 
@@ -60,7 +61,7 @@ Use **`list_creations`** as the gallery. It is the right tool when the user want
    - **`get_creation_content`** for the full SVG string when the user wants the file or code.
    - **`get_creation_content`** with `includePng: true` when presenting the creation visually. The tool returns both the SVG and a PNG preview plus a `renderInstruction` telling you to display the PNG to the user. Default visual presentation should show the PNG, not inline SVG.
 
-Filter gallery calls with `method`, `status`, `limit`, and `cursor` when the user narrows the scope (for example only completed generations).
+Filter gallery calls with `method` (`generate` or `vectorize` until animation rollout), `status`, `limit` (1–100), and `cursor` when the user narrows the scope (for example only completed generations).
 
 ## Model Selection
 
@@ -125,7 +126,7 @@ Use `create_animation` when the user wants to animate an SVG that already exists
 
 - Supply exactly one `source`: `{ "creationId": "..." }` for an existing QuiverAI creation, or an SVG source as `{ "url": "https://..." }`, `{ "base64": "...", "mediaType": "image/svg+xml" }`, or `{ "uploadId": "..." }`.
 - If the user references something they generated earlier ("animate the drone I made yesterday"), call `list_creations` first to find the creation ID.
-- Animation tasks always return a single creation.
+- The optional `n` controls the number of animations and may be 1 to 4 (default 1). Animation tasks can return multiple creations.
 - The optional `prompt` controls animation direction, not visual style. The source SVG already defines style; keep the prompt short and concrete (for example, "gentle drift loop", "pulse the central element"). Do not restate color, composition, or typography.
 - Poll the returned `taskId` with `get_task`, then fetch SVG via `get_creation_content` on the resulting creation id.
 
