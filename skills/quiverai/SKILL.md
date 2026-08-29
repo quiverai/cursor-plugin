@@ -32,7 +32,7 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 
 - `taskId` — from every `create_*` response; **only** for `get_task` (polling / whole-request status).
 - `id` (creation id) — on gallery items and in `creationIds`; for `get_creation`, `get_creation_content`, and `{ "creationId": "..." }` animation sources.
-- Never pass a `taskId` to `get_creation` or `get_creation_content` (the server returns a 400 with guidance).
+- Never pass a `taskId` to `get_creation` or `get_creation_content` (the server returns an MCP tool error result with guidance).
 
 **When the user asks for an SVG**
 
@@ -61,7 +61,7 @@ Use **`list_creations`** as the gallery. It is the right tool when the user want
    - **`get_creation_content`** for the full SVG string when the user wants the file or code.
    - **`get_creation_content`** with `includePng: true` when presenting the creation visually. The tool returns both the SVG and a PNG preview plus a `renderInstruction` telling you to display the PNG to the user. Default visual presentation should show the PNG, not inline SVG.
 
-Filter gallery calls with `method` (`generate` or `vectorize` until animation rollout), `status`, `limit` (1–100), and `cursor` when the user narrows the scope (for example only completed generations).
+Filter gallery calls with `method` (`generate`, `vectorize`, or `animate`), `status`, `limit` (1–100), and `cursor` when the user narrows the scope (for example only completed generations).
 
 ## Model Selection
 
