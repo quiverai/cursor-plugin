@@ -1,6 +1,6 @@
 ---
 name: quiverai
-description: Use when creating, refining, animating, or vectorizing SVG assets with the QuiverAI MCP server, including model selection, reference-image prompting, structured prompt writing, direct source ingestion, generation, animation, vectorization, polling, and reading completed SVG content.
+description: Use when creating, refining, animating, or vectorizing SVG assets with the QuiverAI MCP server, including model selection, reference-image prompting, structured prompt writing, direct source ingestion, generation, animation, vectorization, and reading completed SVG content.
 ---
 
 # QuiverAI SVG Generation
@@ -24,13 +24,13 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 
 | Concept      | What it is                                                                                         | MCP tool                               | Typical use                                                                                                    |
 | ------------ | -------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Task**     | One whole request (generation, vectorization, or animation) that may produce one or more creations | `get_task`                             | Poll status after `create_*`; inspect all outputs and failure summary for that request                         |
+| **Task**     | One whole request (generation, vectorization, or animation) that may produce one or more creations | `get_task`                             | Inspect an existing request later; successful `create_*` already returns completed `creationIds`               |
 | **Creation** | One generated SVG asset (one row in the gallery)                                                   | `get_creation`, `get_creation_content` | Metadata for one asset; **full SVG string** when the user wants the SVG; optional PNG preview for user display |
 | **Gallery**  | The user's list of past creations                                                                  | `list_creations`                       | Browse prompts and ids; optionally include inline SVG per item                                                 |
 
 **ID rules**
 
-- `taskId` — from every `create_*` response; **only** for `get_task` (polling / whole-request status).
+- `taskId` — from every `create_*` response; **only** for `get_task` (later whole-request status).
 - `id` (creation id) — on gallery items and in `creationIds`; for `get_creation`, `get_creation_content`, and `{ "creationId": "..." }` animation sources.
 - Never pass a `taskId` to `get_creation` or `get_creation_content` (the server returns an MCP tool error result with guidance).
 
@@ -45,9 +45,9 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 2. When the task continues from an existing QuiverAI creation (animating it, referencing it, or producing a follow-up), call `list_creations` first to find the right creation ID. Browse without content; do not pull SVG payloads at this stage.
 3. If the user provides or asks to use a reference/source image, pass it directly to the create tool as `{ "url": "https://...", "filename": "reference.png" }`, `{ "base64": "...", "mediaType": "image/png", "filename": "reference.png" }`, or `{ "uploadId": "..." }`. `filename` is optional. Quiver fetches or decodes non-upload sources, validates them, stores them, and persists only upload IDs.
 4. Pick the right create tool: `create_generation` for text-to-SVG, `create_vectorization` for raster-to-SVG, or `create_animation` to animate an existing SVG creation or SVG source.
-5. `create_generation` accepts optional `n` from 1 to 16 (default 1); `create_animation` accepts optional `n` from 1 to 4 (default 1).
-6. Poll **`get_task`** with the returned **`taskId`** until status is terminal (`completed`, `failed`, or `stopped`). If every creation is `completed` but the parent task still says `generating`, stop polling, treat the completed creations as ready, and record the status mismatch in your response.
-7. Read output creation ids via **`creationIds`** or `get_task.creations[].id`. Treat `get_task` as status-only; do **not** show SVG snapshots or SVG strings from task polling as final output.
+5. `create_generation` accepts optional `n` from 1 to 16 (default 1). `create_animation` returns one output; omit `n` or pass `1`.
+6. A successful `create_*` returns `status: "completed"` with `creationIds` and `taskId`. Consume `creationIds` directly. Do not poll `get_task` after a completed create; stop polling once `create_*` returns completed.
+7. Use `get_task` later only to inspect an existing request. Treat `get_task` as status-only; do **not** show SVG snapshots or SVG strings from task reads as final output.
 8. For each completed output you will present, call **`get_creation_content`** with `{ "id": "<creation id>", "includePng": true }`. By default, show only the returned PNG preview to the user. Show SVG text/code only when the user explicitly asks for the SVG source or file content.
 
 ## Gallery workflow (browse → pick → fetch SVG)
@@ -67,10 +67,8 @@ Filter gallery calls with `method` (`generate`, `vectorize`, or `animate`), `sta
 
 - Inspect each `list_models` entry's `access` field before selecting a model. Use models with `access.state: "ok"` directly. If a model is `locked`, explain that it requires one of `requiredPlans` or on-demand credits before using it.
 - Inspect operation-level `availability` before calling paid operations. For example, only call `create_animation` when the selected model's `availability.animate.access.state` is `"ok"`; if it is `"locked"`, report the plan/credit requirement instead of trying the tool.
-- Prefer Arrow 1.1 for general-purpose generation. It is the default choice for stability, speed, and accuracy.
-- Use Arrow 1.1 Max for detail-heavy outputs, refinement-focused generations, engineering sketches, fashion sketches, or cases where richer detail is worth slower generation.
-- Be careful with Arrow 1.1 Max when the user wants a simple icon, clean mark, or minimal illustration; extra detail can create more cleanup work.
-- Avoid older model versions unless the user specifically asks for them or `list_models` shows Arrow 1.1 is unavailable.
+- Use Arrow 2 (`arrow-2`) for generation, vectorization, and animation. App 2.0 MCP execution accepts only this model.
+- Do not submit Arrow 1, Arrow 1.1, or Arrow 1.1 Max IDs. Those models are retired for MCP create tools and return schema errors.
 
 ## Prompt Craft
 
@@ -126,9 +124,9 @@ Use `create_animation` when the user wants to animate an SVG that already exists
 
 - Supply exactly one `source`: `{ "creationId": "..." }` for an existing QuiverAI creation, or an SVG source as `{ "url": "https://..." }`, `{ "base64": "...", "mediaType": "image/svg+xml" }`, or `{ "uploadId": "..." }`.
 - If the user references something they generated earlier ("animate the drone I made yesterday"), call `list_creations` first to find the creation ID.
-- The optional `n` controls the number of animations and may be 1 to 4 (default 1). Animation tasks can return multiple creations.
+- OpenResponses animation returns one output. Omit `n` or pass `1`.
 - The optional `prompt` controls animation direction, not visual style. The source SVG already defines style; keep the prompt short and concrete (for example, "gentle drift loop", "pulse the central element"). Do not restate color, composition, or typography.
-- Poll the returned `taskId` with `get_task`, then fetch SVG via `get_creation_content` on the resulting creation id.
+- Read `creationIds` from the completed `create_*` response, then fetch SVG via `get_creation_content` on the resulting creation id.
 
 ## Strong Use Cases
 
@@ -139,16 +137,16 @@ QuiverAI is especially strong at:
 - Carrying forward a specific reference style
 - Wordmarks and typography
 - Raster-to-SVG vectorization when the source image is not heavily textured
-- Engineering and fashion-style sketches with Arrow 1.1 Max
+- Engineering and fashion-style sketches
 
 ## Result Handling
 
-- After generation or vectorization completes, fetch the completed creation content with `get_creation_content({ "id": "<creation id>", "includePng": true })` before presenting results. Show the returned PNG preview as the default final output; do not show task-poll SVG as final.
+- After generation or vectorization completes, fetch the completed creation content with `get_creation_content({ "id": "<creation id>", "includePng": true })` before presenting results. Show the returned PNG preview as the default final output; do not show task-read SVG as final.
 - Default gallery browse: `list_creations` without content; fetch SVG with `get_creation_content` only for the chosen creation id.
 - Do not auto-run more paid `create_generation` or `create_vectorization` calls just because an output looks bad. Ask the user before spending another generation or vectorization call unless the user already gave a fixed iteration limit.
 - If the user gave a fixed iteration limit, do not exceed it. When the limit is reached, report the best result and any remaining issues instead of starting another paid call.
 - If `get_task` shows all creations completed while the parent task remains `generating`, fetch the completed creations with `get_creation_content({ "includePng": true })` and mention the task/creation status mismatch.
 - If a task fails, use `get_task` failure fields and adjust the next prompt from the failure mode.
-- If outputs are close but over-detailed, simplify the prompt and prefer Arrow 1.1 over Arrow 1.1 Max.
+- If outputs are close but over-detailed, simplify the prompt and tighten preservation language.
 - If outputs miss a reference, make preservation language stricter and separate preserved attributes from requested changes.
 - After an SVG/vector creation has been generated, do not suggest vectorizing it; suggest editing, iterating, exporting, or using it instead.
