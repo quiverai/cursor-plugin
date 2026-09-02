@@ -40,9 +40,9 @@ cursor-agent mcp login quiverai
 
 ## Sign in
 
-Cursor handles authentication through its MCP login flow. The first time you call a QuiverAI tool you will be prompted to sign in to your Quiver account; tokens are stored by Cursor.
+Cursor handles authentication through its MCP login flow. The first time you call a QuiverAI tool you will be prompted to sign in to your QuiverAI account; tokens are stored by Cursor.
 
-If you do not already have a Quiver account, sign up at [quiver.ai](https://quiver.ai).
+If you do not already have a QuiverAI account, sign up at [quiver.ai](https://quiver.ai).
 
 ## MCP tools exposed
 

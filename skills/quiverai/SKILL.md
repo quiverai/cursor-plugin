@@ -43,7 +43,7 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 
 1. Call `list_models` before choosing a model unless the user explicitly named one.
 2. When the task continues from an existing QuiverAI creation (animating it, referencing it, or producing a follow-up), call `list_creations` first to find the right creation ID. Browse without content; do not pull SVG payloads at this stage.
-3. If the user provides or asks to use a reference/source image, pass it directly to the create tool as `{ "url": "https://...", "filename": "reference.png" }`, `{ "base64": "...", "mediaType": "image/png", "filename": "reference.png" }`, or `{ "uploadId": "..." }`. `filename` is optional. Quiver fetches or decodes non-upload sources, validates them, stores them, and persists only upload IDs.
+3. If the user provides or asks to use a reference/source image, pass it directly to the create tool as `{ "url": "https://...", "filename": "reference.png" }`, `{ "base64": "...", "mediaType": "image/png", "filename": "reference.png" }`, or `{ "uploadId": "..." }`. `filename` is optional. QuiverAI fetches or decodes non-upload sources, validates them, stores them, and persists only upload IDs.
 4. Pick the right create tool: `create_generation` for text-to-SVG, `create_vectorization` for raster-to-SVG, or `create_animation` to animate an existing SVG creation or SVG source.
 5. `create_generation` accepts optional `n` from 1 to 16 (default 1). `create_animation` returns one output; omit `n` or pass `1`.
 6. A successful `create_*` returns `status: "completed"` with `creationIds` and `taskId`. Consume `creationIds` directly. Do not poll `get_task` after a completed create; stop polling once `create_*` returns completed.
@@ -104,7 +104,7 @@ When a reference image is available, pass it in `create_generation.references`. 
 - State what should change separately from what should be preserved.
 - Use the reference for color combinations, illustration style, composition, and typography.
 - If the user wants a variation, derive the prompt from the reference first, then modify only the requested dimensions.
-- Prefer public image URLs when the chat host exposes uploaded files as public URLs. Use base64 only when the host gives image bytes directly. Existing completed Quiver upload IDs are still accepted.
+- Prefer public image URLs when the chat host exposes uploaded files as public URLs. Use base64 only when the host gives image bytes directly. Existing completed QuiverAI upload IDs are still accepted.
 
 Avoid vague reference prompts such as:
 
