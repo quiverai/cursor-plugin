@@ -1,7 +1,7 @@
 {
   "name": "quiverai",
   "version": "0.1.0",
-  "description": "Create, refine, and vectorize SVG assets with the hosted QuiverAI MCP server.",
+  "description": "Generate, refine, vectorize, and animate SVG assets with Arrow 2 through the hosted QuiverAI MCP server.",
   "author": {
     "name": "QuiverAI",
     "email": "support@quiver.ai"
@@ -9,7 +9,7 @@
   "homepage": "https://quiver.ai",
   "repository": "https://github.com/quiverai/cursor-plugin",
   "license": "MIT",
-  "keywords": ["quiverai", "svg", "vector", "mcp", "design"],
+  "keywords": ["quiverai", "svg", "vector", "animation", "mcp", "design"],
   "logo": "assets/logo.svg",
   "skills": "./skills/"
 }

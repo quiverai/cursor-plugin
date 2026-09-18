@@ -5,7 +5,7 @@ description: Use when creating, refining, animating, or vectorizing SVG assets w
 
 # QuiverAI SVG Generation
 
-Use this skill when a user wants to create, refine, or vectorize SVG assets with the QuiverAI MCP server.
+Use this skill when a user wants to create, refine, animate, or vectorize SVG assets with the QuiverAI MCP server.
 
 Before starting, confirm the QuiverAI MCP server is connected and its tools are available.
 
@@ -67,7 +67,7 @@ Filter gallery calls with `method` (`generate`, `vectorize`, or `animate`), `sta
 
 - Inspect each `list_models` entry's `access` field before selecting a model. Use models with `access.state: "ok"` directly. If a model is `locked`, explain that it requires one of `requiredPlans` or on-demand credits before using it.
 - Inspect operation-level `availability` before calling paid operations. For example, only call `create_animation` when the selected model's `availability.animate.access.state` is `"ok"`; if it is `"locked"`, report the plan/credit requirement instead of trying the tool.
-- Use Arrow 2 (`arrow-2`) for generation, vectorization, and animation. App 2.0 MCP execution accepts only this model.
+- Use Arrow 2 (`arrow-2`) for generation, vectorization, and animation. MCP create tools accept only this model.
 - Do not submit Arrow 1, Arrow 1.1, or Arrow 1.1 Max IDs. Those models are retired for MCP create tools and return schema errors.
 
 ## Prompt Craft
@@ -124,7 +124,7 @@ Use `create_animation` when the user wants to animate an SVG that already exists
 
 - Supply exactly one `source`: `{ "creationId": "..." }` for an existing QuiverAI creation, or an SVG source as `{ "url": "https://..." }`, `{ "base64": "...", "mediaType": "image/svg+xml" }`, or `{ "uploadId": "..." }`.
 - If the user references something they generated earlier ("animate the drone I made yesterday"), call `list_creations` first to find the creation ID.
-- OpenResponses animation returns one output. Omit `n` or pass `1`.
+- Animation returns exactly one output. Omit `n` or pass `1`.
 - The optional `prompt` controls animation direction, not visual style. The source SVG already defines style; keep the prompt short and concrete (for example, "gentle drift loop", "pulse the central element"). Do not restate color, composition, or typography.
 - Read `creationIds` from the completed `create_*` response, then fetch SVG via `get_creation_content` on the resulting creation id.
 
