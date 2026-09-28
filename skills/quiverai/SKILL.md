@@ -22,11 +22,11 @@ Before starting, confirm the QuiverAI MCP server is connected and its tools are 
 
 QuiverAI separates three read surfaces. Pick the tool that matches what the user means.
 
-| Concept      | What it is                                                                                         | MCP tool                               | Typical use                                                                                                    |
-| ------------ | -------------------------------------------------------------------------------------------------- | -------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| **Task**     | One whole request (generation, vectorization, or animation) that may produce one or more creations | `get_task`                             | Inspect an existing request later; successful `create_*` already returns completed `creationIds`               |
-| **Creation** | One generated SVG asset (one row in the gallery)                                                   | `get_creation`, `get_creation_content` | Metadata for one asset; **full SVG string** when the user wants the SVG; optional PNG preview for user display |
-| **Gallery**  | The user's list of past creations                                                                  | `list_creations`                       | Browse prompts and ids; optionally include inline SVG per item                                                 |
+| Concept | What it is | MCP tool | Typical use |
+| --- | --- | --- | --- |
+| **Task** | One whole request (generation, vectorization, or animation) that may produce one or more creations | `get_task` | Inspect an existing request later; successful `create_*` already returns completed `creationIds` |
+| **Creation** | One generated SVG asset (one row in the gallery) | `get_creation`, `get_creation_content` | Metadata for one asset; **full SVG string** when the user wants the SVG; optional PNG preview for user display |
+| **Gallery** | The user's list of past creations | `list_creations` | Browse prompts and ids; optionally include inline SVG per item |
 
 **ID rules**
 
