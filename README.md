@@ -2,13 +2,14 @@
 
 # QuiverAI for Cursor
 
-Generate, refine, vectorize, and animate SVG assets with Arrow 2 through the hosted [QuiverAI](https://quiver.ai) MCP server, right from Cursor.
+Generate, vectorize, animate, and edit SVG assets with Arrow 2 through the hosted [QuiverAI](https://quiver.ai) MCP server, right from Cursor.
 
 ## What it does
 
 - Text-to-SVG generation with Arrow 2, QuiverAI's flagship vector model
 - Raster-to-SVG vectorization into editable SVGs you can refine, scale, and reuse
 - Micro animations that bring motion to static SVG assets, for logo reveals, loading states, and animated icons
+- Instruction-based edits of existing SVG creations or SVG sources
 - Reference-image prompting and refinement
 - Creation and task lookup
 - A bundled agent skill that guides model selection, prompt structure, and result handling
@@ -51,10 +52,11 @@ If you do not already have a QuiverAI account, sign up at [quiver.ai](https://qu
 - `list_creations` - list generated QuiverAI creations for the connected user
 - `get_creation` - read integration-safe metadata for one creation
 - `get_creation_content` - read SVG content for one creation
-- `get_task` - read the status of an existing generation, vectorization, or animation task
+- `get_task` - read the status of an existing generation, vectorization, animation, or edit task
 - `create_generation` - create a text-to-SVG generation task from text and optional image sources
 - `create_vectorization` - create a raster-to-SVG vectorization task from an image source
 - `create_animation` - create an animation task from an existing SVG creation or SVG source
+- `create_edit` - create an edit task from an existing SVG creation or SVG source and an edit instruction
 
 ## Bundled skill
 
@@ -65,6 +67,7 @@ If you do not already have a QuiverAI account, sign up at [quiver.ai](https://qu
 - "Create a flat vector illustration of a delivery drone with QuiverAI."
 - "Vectorize this raster image with QuiverAI."
 - "Animate the logo I made in QuiverAI with a gentle drift loop."
+- "Edit my QuiverAI logo to use a bolder stroke."
 - "Generate a wordmark for an indie coffee brand in a muted palette, then vectorize the best result."
 
 ## Verifying the install

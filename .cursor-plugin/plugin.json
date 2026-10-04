@@ -1,7 +1,7 @@
 {
   "name": "quiverai",
-  "version": "0.1.0",
-  "description": "Generate, refine, vectorize, and animate SVG assets with Arrow 2 through the hosted QuiverAI MCP server.",
+  "version": "0.2.0",
+  "description": "Generate, vectorize, animate, and edit SVG assets with Arrow 2 through the hosted QuiverAI MCP server.",
   "author": {
     "name": "QuiverAI",
     "email": "support@quiver.ai"
