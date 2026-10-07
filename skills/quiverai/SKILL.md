@@ -26,7 +26,7 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 | --- | --- | --- | --- |
 | **Chat** | The QuiverAI Chat one `create_*` ran in, holding every creation it wrote | `get_task` | List a create's creations later; successful `create_*` already returns completed `creationIds` |
 | **Creation** | One SVG design with a linear version history (one item in the gallery; an icon set groups its icons) | `get_creation`, `get_creation_content` | Metadata and versions for one design; **full SVG string** of its current version when the user wants the SVG; optional PNG preview for user display |
-| **Gallery** | The user's list of past creations | `list_creations` | Browse paths and ids; optionally include inline SVG per item |
+| **Gallery** | The user's list of past creations | `list_creations` | Browse ids, paths and prompts; never returns SVG |
 
 **ID rules**
 
@@ -54,14 +54,13 @@ QuiverAI separates three read surfaces. Pick the tool that matches what the user
 
 Use **`list_creations`** as the gallery. It is the right tool when the user wants to see what they already made, search by prompt, or pick an asset to open.
 
-1. **Browse metadata (default)** — `list_creations` with `includeContent: false` (or omit it). Each item includes `id`, `path`, `chatId`, `chatTitle`, `versionId`, `isFavorite`, and timestamps. Use paths and Chat titles to choose the right creation, and `get_creation` for the prompt that wrote it.
-2. **Browse with inline SVG (optional)** — `list_creations` with `includeContent: true` only when you need SVG for many items at once; prefer the two-step flow below for large galleries.
-3. **Open one creation** — After choosing an `id` from the gallery:
+1. **Browse metadata** — `list_creations` never returns SVG. Each item includes `id`, `path`, `prompt`, `iconSetId`, `chatId`, `chatTitle`, `versionId`, `isFavorite`, and timestamps. Use prompts, paths and Chat titles to choose the right creation; group icons by `iconSetId`.
+2. **Open one creation** — After choosing an `id` from the gallery:
    - `get_creation` for metadata (prompt, rating, version history) when needed.
    - **`get_creation_content`** for the full SVG string of the current version when the user wants the file or code.
    - **`get_creation_content`** with `includePng: true` when presenting the creation visually. The tool returns both the SVG and a PNG preview plus a `renderInstruction` telling you to display the PNG to the user. Default visual presentation should show the PNG, not inline SVG.
 
-Page gallery calls with `limit` (1–100 gallery items; an icon set is one item and returns all of its icons) and the `cursor` from the previous response.
+Page gallery calls with `limit` (1–100 creations; each icon in an icon set counts as one, and a page can end inside a set) and the `cursor` from the previous response.
 
 ## Model Selection
 
